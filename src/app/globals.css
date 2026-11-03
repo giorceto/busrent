@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+@theme {
+  --color-navy: #0e2a50;
+  --color-navy-deep: #0a1e3d;
+  --color-navy-soft: #163763;
+  --color-amber: #f5a524;
+  --color-amber-ink: #1b1405;
+  --color-amber-deep: #c98200;
+  --color-ground: #f6f7f9;
+  --color-line: #e6eaf0;
+  --color-ink: #0f172a;
+  --color-muted: #475569;
+  --color-ok: #166534;
+  --color-ok-soft: #e7f6ec;
+  --color-sky-soft: #e7eef8;
+  --font-sans: "Manrope Variable", system-ui, sans-serif;
+  --font-display: "Unbounded Variable", "Manrope Variable", sans-serif;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-ground);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  /* без българските локални форми на кирилицата (д, в, г, т като ръкописни) — по-четимо */
+  font-feature-settings: "locl" 0;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-amber);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+.card-hover {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 34px rgb(15 23 42 / 0.1);
+}
+
+.field {
+  @apply w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-base text-ink;
+}
+.label {
+  @apply flex flex-col gap-2 text-sm font-bold text-slate-700;
+}
+.btn-primary {
+  @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-amber px-6 font-extrabold text-amber-ink transition-colors hover:bg-[#e8961a] disabled:opacity-60;
+}
+.btn-secondary {
+  @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-slate-300 bg-white px-5 font-bold text-ink hover:bg-slate-50;
+}
+.btn-navy {
+  @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-navy px-6 font-extrabold text-white hover:bg-navy-deep disabled:opacity-60;
+}
+.panel {
+  @apply rounded-3xl border border-line bg-white;
+}

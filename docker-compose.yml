@@ -1,0 +1,34 @@
+# BusRent на VPS: приложение + PostgreSQL. HTTPS и домейна обслужва Caddy, който вече върви на VPS-а
+# (виж caddy/busrent.caddy) — той препраща към 127.0.0.1:3010.
+# Стартиране: docker compose up -d --build
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://busrent:${POSTGRES_PASSWORD}@db:5432/busrent
+      UPLOAD_DIR: /data/uploads
+    volumes:
+      - uploads:/data/uploads
+    depends_on:
+      - db
+    ports:
+      - "127.0.0.1:3010:3000"
+    mem_limit: 1g
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: busrent
+      POSTGRES_USER: busrent
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    mem_limit: 768m
+
+
+volumes:
+  pgdata:
+  uploads:

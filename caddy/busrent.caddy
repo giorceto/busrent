@@ -1,0 +1,12 @@
+# Добави това в Caddyfile на VPS-а (обикновено /etc/caddy/Caddyfile), после:
+#   sudo caddy validate --config /etc/caddy/Caddyfile && sudo systemctl reload caddy
+# Caddy сам ще вземе HTTPS сертификат за busrent.eu.
+
+busrent.eu {
+	encode zstd gzip
+	reverse_proxy 127.0.0.1:3010
+}
+
+www.busrent.eu {
+	redir https://busrent.eu{uri} permanent
+}
