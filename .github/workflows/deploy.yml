@@ -1,0 +1,66 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npx eslint src
+
+  deploy:
+    needs: check
+    runs-on: ubuntu-latest
+    env:
+      HAS_SECRETS: ${{ secrets.VPS_HOST != '' && secrets.VPS_SSH_KEY != '' }}
+    steps:
+      - name: Няма тайни за VPS — пропускам качването
+        if: env.HAS_SECRETS != 'true'
+        run: echo "Добави VPS_HOST, VPS_USER и VPS_SSH_KEY в Settings → Secrets → Actions."
+
+      - uses: actions/checkout@v4
+        if: env.HAS_SECRETS == 'true'
+
+      - name: SSH ключ
+        if: env.HAS_SECRETS == 'true'
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Копиране на кода
+        if: env.HAS_SECRETS == 'true'
+        run: |
+          rsync -az --delete \
+            --exclude '.git' --exclude 'node_modules' --exclude '.next' --exclude '.env' \
+            --exclude '.pgdata' --exclude '.uploads' \
+            ./ "${{ secrets.VPS_USER || 'deploy' }}@${{ secrets.VPS_HOST }}:/opt/busrent/"
+
+      - name: Build и рестарт
+        if: env.HAS_SECRETS == 'true'
+        run: |
+          ssh "${{ secrets.VPS_USER || 'deploy' }}@${{ secrets.VPS_HOST }}" '
+            set -e
+            cd /opt/busrent
+            if [ ! -f .env ]; then echo "Липсва /opt/busrent/.env (виж .env.example)"; exit 1; fi
+            docker compose up -d --build --remove-orphans
+            docker image prune -f
+            sleep 8
+            docker compose ps
+            docker compose logs --tail=20 app
+          '
