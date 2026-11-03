@@ -1,12 +1,45 @@
+import nodemailer from "nodemailer";
+import type { Transporter } from "nodemailer";
 import { SITE_URL } from "./util";
 
+let smtp: Transporter | null = null;
+function getSmtp() {
+  if (!process.env.SMTP_HOST) return null;
+  if (!smtp) {
+    const port = Number(process.env.SMTP_PORT ?? 587);
+    smtp = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port,
+      secure: port === 465, // 465 = SSL, 587 = STARTTLS
+      auth: process.env.SMTP_USER ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS } : undefined,
+      connectionTimeout: 15_000,
+    });
+  }
+  return smtp;
+}
+
 /**
- * Имейли през Resend (https://resend.com). Без RESEND_API_KEY имейлите само се записват в лога —
- * удобно за тестове, но на живо ключът трябва да е зададен.
+ * Изпращане на имейл. Ред на избор:
+ *  1. SMTP (SMTP_HOST...) — собствен пощенски сървър;
+ *  2. Resend (RESEND_API_KEY);
+ *  3. нищо от горните — имейлът само се записва в лога (за тестове).
  */
 export async function sendMail(opts: { to: string; subject: string; html: string; replyTo?: string }) {
   const key = process.env.RESEND_API_KEY;
   const from = process.env.MAIL_FROM ?? "BusRent <noreply@busrent.eu>";
+
+  const transport = getSmtp();
+  if (transport) {
+    try {
+      await transport.sendMail({ from, to: opts.to, subject: opts.subject, html: opts.html, replyTo: opts.replyTo });
+      console.log(`[mail:smtp] → ${opts.to} | ${opts.subject}`);
+      return { ok: true };
+    } catch (e) {
+      console.error("[mail:smtp] failed", opts.to, e instanceof Error ? e.message : e);
+      return { ok: false };
+    }
+  }
+
   if (!key) {
     console.log(`[mail:dry-run] → ${opts.to} | ${opts.subject}`);
     return { ok: true, dryRun: true };
