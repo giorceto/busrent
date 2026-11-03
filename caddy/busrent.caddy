@@ -4,7 +4,7 @@
 
 busrent.eu {
 	encode zstd gzip
-	reverse_proxy 127.0.0.1:3010
+	reverse_proxy 127.0.0.1:3020
 }
 
 www.busrent.eu {

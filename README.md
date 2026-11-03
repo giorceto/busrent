@@ -33,7 +33,7 @@
 2. Създай `/opt/busrent/.env` по образеца в `.env.example`.
 3. В GitHub → Settings → Secrets and variables → Actions: `VPS_HOST`, `VPS_USER` (=`deploy`), `VPS_SSH_KEY` (частният ключ).
 4. DNS: A запис `busrent.eu` и `www` → IP на VPS-а.
-5. Добави блока от `caddy/busrent.caddy` в Caddyfile на VPS-а и презареди Caddy. Сайтът слуша само на `127.0.0.1:3010`, а Caddy го изкарва навън с HTTPS.
+5. Добави блока от `caddy/busrent.caddy` в Caddyfile на VPS-а и презареди Caddy. Сайтът слуша само на `127.0.0.1:3020`, а Caddy го изкарва навън с HTTPS.
 
 След това **всяко качване в `main` минава проверки и пуска новата версия автоматично** (GitHub → Actions).
 

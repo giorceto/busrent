@@ -1,5 +1,5 @@
 # BusRent на VPS: приложение + PostgreSQL. HTTPS и домейна обслужва Caddy, който вече върви на VPS-а
-# (виж caddy/busrent.caddy) — той препраща към 127.0.0.1:3010.
+# (виж caddy/busrent.caddy) — той препраща към 127.0.0.1:3020.
 # Стартиране: docker compose up -d --build
 services:
   app:
@@ -14,7 +14,7 @@ services:
     depends_on:
       - db
     ports:
-      - "127.0.0.1:3010:3000"
+      - "127.0.0.1:3020:3000"
     mem_limit: 1g
 
   db:
